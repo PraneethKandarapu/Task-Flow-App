@@ -3,6 +3,7 @@ const helmet = require("helmet");
 const cors = require("cors");
 const app = express();
 const errorHandler = require("./middlewares/error.middleware");
+const taskRoutes = require("./modules/tasks/task.routes");
 app.use(helmet()); //adds http secuirty headers
 app.use(cors());
 app.use(express.json());
@@ -14,6 +15,8 @@ app.get("/health", (req, res) => {
     message: " Taskflow API is running",
   });
 });
+
+app.use("/api/v1/tasks", taskRoutes);
 
 app.use(errorHandler); //register the global error-handling middleware
 module.exports = app;

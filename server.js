@@ -15,6 +15,7 @@ const startServer = async () => {
     //listen for requests
     app.listen(PORT, () => {
       console.log(`server started at ${PORT}`);
+      
     });
   } catch (err) {
     console.log(err);
