@@ -1,12 +1,11 @@
-const AppError = require("../utils/AppError");
-const validate = (schema) => {
+//to validate
+
+const validateMiddleware = (schema) => {
   return (req, res, next) => {
     const result = schema.safeParse(req.body);
-    if (!result.success) {
-      return next(new AppError("validation failed", 400));
-    }
+    if (!result.success) return next(result.error);
     next();
   };
 };
 
-module.exports = validate;
+module.exports = validateMiddleware;

@@ -3,7 +3,11 @@ const helmet = require("helmet");
 const cors = require("cors");
 const app = express();
 const errorHandler = require("./middlewares/error.middleware");
+
+// routes
 const taskRoutes = require("./modules/tasks/task.routes");
+const userRoutes = require("./modules/users/user.routes");
+
 app.use(helmet()); //adds http secuirty headers
 app.use(cors());
 app.use(express.json());
@@ -17,6 +21,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/v1/tasks", taskRoutes);
+app.use("/api/v1/users", userRoutes);
 
 app.use(errorHandler); //register the global error-handling middleware
 module.exports = app;
