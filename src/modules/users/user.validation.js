@@ -5,6 +5,12 @@ const registerUserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
 });
+
+const loginUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
 module.exports = {
   registerUserSchema,
+  loginUserSchema,
 };

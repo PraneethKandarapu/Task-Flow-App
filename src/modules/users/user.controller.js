@@ -12,4 +12,17 @@ const registerUser = async (req, res, next) => {
     next(err);
   }
 };
-module.exports = { registerUser };
+const loginUser = async (req, res, next) => {
+  try {
+    const userData = { ...req.body };
+    const { user, token } = await userService.loginUser(userData);
+    res.status(200).json({
+      success: true,
+      user,
+      token,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+module.exports = { registerUser, loginUser };

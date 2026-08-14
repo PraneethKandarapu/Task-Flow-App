@@ -5,6 +5,7 @@ const createTask = async (req, res, next) => {
     // recieve taskData from req using spread operator
     const taskData = {
       ...req.body,
+      createdBy: req.user.userId,
     };
 
     // call the service
