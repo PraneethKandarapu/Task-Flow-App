@@ -1,3 +1,4 @@
+const AppError = require("../../utils/AppError");
 const taskService = require("./task.service");
 
 const createTask = async (req, res, next) => {
@@ -19,4 +20,34 @@ const createTask = async (req, res, next) => {
   }
 };
 
-module.exports = { createTask };
+const getTasks = async (req, res, next) => {
+  try {
+    const userId = req.user.userId;
+    const tasks = await taskService.getTasks(userId);
+    res.status(200).json({
+      success: true,
+      tasks,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getTaskById = async (req, res, next) => {
+  try {
+    const taskId = req.params.id;
+    const userId = req.user.userId;
+    const task = await taskService.getTaskById(taskId, userId);
+    if (!task) {
+      throw new AppError("Task not found", 404);
+    }
+    res.status(200).json({
+      success: true,
+      task,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { createTask, getTasks, getTaskById };
