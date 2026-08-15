@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { registerUser } from "../services/api";
+import { loginUser } from "../services/api";
 
-function Register({ onLoginClick }) {
+function Login({ onLogin, onRegisterClick }) {
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,23 +24,21 @@ function Register({ onLoginClick }) {
 
     setLoading(true);
     setError("");
-    setSuccess("");
 
     try {
-      const result = await registerUser(formData);
+      const result = await loginUser(formData);
 
       if (!result.ok) {
         setError(result.data.message);
         return;
       }
 
-      setSuccess("Account created successfully!");
+      const { user, token } = result.data;
 
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-      });
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      onLogin(user, token);
     } catch (err) {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -58,22 +54,12 @@ function Register({ onLoginClick }) {
           <span>TaskFlow</span>
         </div>
 
-        <h1>Create your account</h1>
-        <p className="subtitle">Start organizing your work with TaskFlow.</p>
+        <h1>Welcome back</h1>
+        <p className="subtitle">Sign in to continue to your tasks.</p>
 
         {error && <div className="message error">{error}</div>}
-        {success && <div className="message success">{success}</div>}
 
         <form onSubmit={handleSubmit}>
-          <label>Name</label>
-          <input
-            type="text"
-            name="name"
-            placeholder="Your name"
-            value={formData.name}
-            onChange={handleChange}
-          />
-
           <label>Email</label>
           <input
             type="email"
@@ -87,20 +73,20 @@ function Register({ onLoginClick }) {
           <input
             type="password"
             name="password"
-            placeholder="At least 8 characters"
+            placeholder="Your password"
             value={formData.password}
             onChange={handleChange}
           />
 
           <button type="submit" disabled={loading}>
-            {loading ? "Creating account..." : "Create account"}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
         <p className="switch-text">
-          Already have an account?{" "}
-          <button className="link-button" onClick={onLoginClick}>
-            Sign in
+          Don't have an account?{" "}
+          <button className="link-button" onClick={onRegisterClick}>
+            Create one
           </button>
         </p>
       </div>
@@ -108,4 +94,4 @@ function Register({ onLoginClick }) {
   );
 }
 
-export default Register;
+export default Login;
