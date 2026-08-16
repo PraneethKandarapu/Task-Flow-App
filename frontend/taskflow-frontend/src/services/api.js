@@ -57,3 +57,22 @@ export const createTask = async (taskData, token) => {
     body: JSON.stringify(taskData),
   });
 };
+
+export const updateTask = async (taskId, taskData, token) => {
+  return request(`/tasks/${taskId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(taskData),
+  });
+};
+
+export const deleteTask = async (taskId, token) => {
+  return request(`/tasks/${taskId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

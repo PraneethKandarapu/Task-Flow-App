@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
+
 import Navbar from "../components/Navbar";
 import TaskForm from "../components/TaskForm";
 import TaskList from "../components/TaskList";
-import { getTaskById, getTasks } from "../services/api";
+import EditTaskForm from "../components/EditTaskForm";
+
+import { getTasks, getTaskById, deleteTask } from "../services/api";
 
 function Dashboard({ user, token, onLogout }) {
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [editingTask, setEditingTask] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -50,6 +55,46 @@ function Dashboard({ user, token, onLogout }) {
     }
   };
 
+  const handleEditTask = (task) => {
+    setEditingTask(task);
+    setSelectedTask(null);
+  };
+
+  const handleTaskUpdated = (updatedTask) => {
+    setTasks((prev) =>
+      prev.map((task) => (task._id === updatedTask._id ? updatedTask : task)),
+    );
+
+    setEditingTask(null);
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this task?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const result = await deleteTask(taskId, token);
+
+      if (!result.ok) {
+        setError(result.data.message);
+        return;
+      }
+
+      setTasks((prev) => prev.filter((task) => task._id !== taskId));
+
+      if (selectedTask?._id === taskId) {
+        setSelectedTask(null);
+      }
+    } catch (err) {
+      setError("Unable to delete task.");
+    }
+  };
+
   return (
     <div className="dashboard">
       <Navbar user={user} onLogout={onLogout} />
@@ -58,7 +103,9 @@ function Dashboard({ user, token, onLogout }) {
         <div className="welcome">
           <div>
             <p className="eyebrow">YOUR WORKSPACE</p>
+
             <h1>Good to see you, {user?.name}.</h1>
+
             <p>Stay focused and keep moving forward.</p>
           </div>
 
@@ -81,7 +128,12 @@ function Dashboard({ user, token, onLogout }) {
           {loading ? (
             <p className="loading-text">Loading tasks...</p>
           ) : (
-            <TaskList tasks={tasks} onTaskClick={handleTaskClick} />
+            <TaskList
+              tasks={tasks}
+              onTaskClick={handleTaskClick}
+              onEditTask={handleEditTask}
+              onDeleteTask={handleDeleteTask}
+            />
           )}
         </section>
 
@@ -102,6 +154,7 @@ function Dashboard({ user, token, onLogout }) {
 
             <div className="detail-meta">
               <span>Status: {selectedTask.status}</span>
+
               <span>Priority: {selectedTask.priority}</span>
 
               {selectedTask.dueDate && (
@@ -110,6 +163,17 @@ function Dashboard({ user, token, onLogout }) {
                 </span>
               )}
             </div>
+          </div>
+        )}
+
+        {editingTask && (
+          <div className="edit-overlay">
+            <EditTaskForm
+              task={editingTask}
+              token={token}
+              onUpdated={handleTaskUpdated}
+              onCancel={() => setEditingTask(null)}
+            />
           </div>
         )}
       </main>
