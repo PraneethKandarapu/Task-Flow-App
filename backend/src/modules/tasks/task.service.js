@@ -6,6 +6,22 @@ const createTask = async (taskData) => {
   return task;
 };
 
+const getTasks = async (userId) => {
+  const tasks = await Task.find({
+    createdBy: userId,
+  });
+  return tasks;
+};
+const getTaskById = async (taskId, userId) => {
+  const task = await Task.findOne({
+    _id: taskId,
+    createdBy: userId,
+  });
+  return task;
+};
+
 module.exports = {
   createTask,
+  getTasks,
+  getTaskById,
 };
