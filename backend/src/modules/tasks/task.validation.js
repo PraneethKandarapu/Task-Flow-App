@@ -16,4 +16,12 @@ const updateTaskSchema = z.object({
   dueDate: z.coerce.date().optional(),
 });
 
-module.exports = { createTaskSchema, updateTaskSchema };
+const getTasksQuerySchema = z.object({
+  status: z.enum(["todo", "in-progress", "done"]).optional(),
+  priority: z.enum(["low", "medium", "high"]).optional(),
+  sort: z.enum(["dueDate", "-dueDate"]).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+});
+
+module.exports = { createTaskSchema, updateTaskSchema, getTasksQuerySchema };

@@ -6,12 +6,34 @@ const createTask = async (taskData) => {
   return task;
 };
 
-const getTasks = async (userId) => {
-  const tasks = await Task.find({
+const getTasks = async (userId, status, priority, sort, page, limit) => {
+  const query = {
     createdBy: userId,
-  });
-  return tasks;
+  };
+  //add status property to query if it exists
+  if (status) {
+    query.status = status;
+  }
+  //add priority property to query if it exists
+  if (priority) {
+    query.priority = priority;
+  }
+  let sortOption = {};
+  if (sort === "dueDate") {
+    sortOption.dueDate = 1;
+  }
+  if (sort === "-dueDate") {
+    sortOption.dueDate = -1;
+  }
+  const skip = (page - 1) * limit;
+  const tasks = await Task.find(query).sort(sortOption).skip(skip).limit(limit);
+  const totalTasks = await Task.countDocuments(query);
+  return {
+    tasks,
+    totalTasks,
+  };
 };
+
 const getTaskById = async (taskId, userId) => {
   const task = await Task.findOne({
     _id: taskId,

@@ -23,10 +23,27 @@ const createTask = async (req, res, next) => {
 const getTasks = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    const tasks = await taskService.getTasks(userId);
+    const { status, priority, sort, page, limit } = req.query;
+
+    const { tasks, totalTasks } = await taskService.getTasks(
+      userId,
+      status,
+      priority,
+      sort,
+      page,
+      limit,
+    );
+    const totalPages = Math.ceil(totalTasks / limit);
+
     res.status(200).json({
       success: true,
       tasks,
+      pagination: {
+        totalTasks,
+        totalPages,
+        currentPage: page,
+        limit: limit,
+      },
     });
   } catch (err) {
     next(err);

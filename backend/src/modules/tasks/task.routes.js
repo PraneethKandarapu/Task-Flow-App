@@ -10,7 +10,11 @@ const {
 } = require("./task.controller");
 const validateMiddleware = require("../../middlewares/validate.middleware");
 const authMiddleware = require("../../middlewares/auth.middleware");
-const { createTaskSchema, updateTaskSchema } = require("./task.validation");
+const {
+  createTaskSchema,
+  updateTaskSchema,
+  getTasksQuerySchema,
+} = require("./task.validation");
 
 router.post(
   "/",
@@ -18,7 +22,12 @@ router.post(
   validateMiddleware(createTaskSchema),
   createTask,
 );
-router.get("/", authMiddleware, getTasks);
+router.get(
+  "/",
+  authMiddleware,
+  validateMiddleware(getTasksQuerySchema, "query"),
+  getTasks,
+);
 router.get("/:id", authMiddleware, getTaskById);
 router.patch(
   "/:id",
@@ -26,5 +35,5 @@ router.patch(
   validateMiddleware(updateTaskSchema),
   updateTask,
 );
-router.delete("/:id", authMiddleware, getTaskById);
+router.delete("/:id", authMiddleware, deleteTask);
 module.exports = router;
