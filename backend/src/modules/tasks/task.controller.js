@@ -50,4 +50,39 @@ const getTaskById = async (req, res, next) => {
   }
 };
 
-module.exports = { createTask, getTasks, getTaskById };
+const updateTask = async (req, res, next) => {
+  try {
+    const taskId = req.params.id;
+    const userId = req.user.userId;
+    const updateData = req.body;
+    const task = await taskService.updateTask(taskId, userId, updateData);
+    if (!task) {
+      throw new AppError("Task not found", 404);
+    }
+    res.status(200).json({
+      success: true,
+      task,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteTask = async (req, res, next) => {
+  try {
+    const taskId = req.params.id;
+    const userId = req.user.userId;
+    const task = await taskService.deleteTask(taskId, userId);
+    if (!task) {
+      throw new AppError("Task not found", 404);
+    }
+    res.status(204).json({
+      success: true,
+      task,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { createTask, getTasks, getTaskById, updateTask, deleteTask };

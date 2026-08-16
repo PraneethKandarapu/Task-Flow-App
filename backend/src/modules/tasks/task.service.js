@@ -20,8 +20,32 @@ const getTaskById = async (taskId, userId) => {
   return task;
 };
 
+const updateTask = async (taskId, userId, updateData) => {
+  const task = await Task.findOneAndUpdate(
+    {
+      _id: taskId,
+      createdBy: userId,
+    },
+    updateData,
+    {
+      new: true,
+    },
+  );
+  return task;
+};
+
+const deleteTask = async (taskId, userId) => {
+  const task = await Task.findOneAndDelete({
+    _id: taskId,
+    createdBy: userId,
+  });
+  return task;
+};
+
 module.exports = {
   createTask,
   getTasks,
   getTaskById,
+  updateTask,
+  deleteTask,
 };
