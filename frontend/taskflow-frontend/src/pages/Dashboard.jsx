@@ -1,40 +1,84 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Navbar from "../components/Navbar";
 import TaskForm from "../components/TaskForm";
 import TaskList from "../components/TaskList";
 import EditTaskForm from "../components/EditTaskForm";
+import TaskFilters from "../components/TaskFilters";
+import Pagination from "../components/Pagination";
 
 import { getTasks, getTaskById, deleteTask } from "../services/api";
 
 function Dashboard({ user, token, onLogout }) {
   const [tasks, setTasks] = useState([]);
+
+  const [pagination, setPagination] = useState({
+    totalTasks: 0,
+    totalPages: 1,
+    currentPage: 1,
+    limit: 10,
+  });
+
+  const [filters, setFilters] = useState({
+    search: "",
+    status: "",
+    priority: "",
+    sort: "",
+  });
+
   const [selectedTask, setSelectedTask] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const loadTasks = async () => {
+  const loadTasks = useCallback(
+    async (page = 1) => {
+      setLoading(true);
+      setError("");
+
       try {
-        const result = await getTasks(token);
+        const result = await getTasks(token, {
+          ...filters,
+          page,
+          limit: 10,
+        });
 
         if (!result.ok) {
-          setError(result.data.message);
+          setError(result.data.message || "Unable to load tasks.");
           return;
         }
 
         setTasks(result.data.tasks);
+        setPagination(result.data.pagination);
       } catch (err) {
         setError("Unable to load tasks.");
       } finally {
         setLoading(false);
       }
-    };
+    },
+    [token, filters],
+  );
 
-    loadTasks();
-  }, [token]);
+  useEffect(() => {
+    loadTasks(1);
+  }, [loadTasks]);
+
+  const handleFilterChange = (name, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      search: "",
+      status: "",
+      priority: "",
+      sort: "",
+    });
+  };
 
   const handleTaskCreated = (task) => {
     setTasks((prev) => [task, ...prev]);
@@ -73,9 +117,7 @@ function Dashboard({ user, token, onLogout }) {
       "Are you sure you want to delete this task?",
     );
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     try {
       const result = await deleteTask(taskId, token);
@@ -90,6 +132,8 @@ function Dashboard({ user, token, onLogout }) {
       if (selectedTask?._id === taskId) {
         setSelectedTask(null);
       }
+
+      loadTasks(pagination.currentPage);
     } catch (err) {
       setError("Unable to delete task.");
     }
@@ -110,7 +154,7 @@ function Dashboard({ user, token, onLogout }) {
           </div>
 
           <div className="task-count">
-            <strong>{tasks.length}</strong>
+            <strong>{pagination.totalTasks}</strong>
             <span>Tasks</span>
           </div>
         </div>
@@ -122,18 +166,32 @@ function Dashboard({ user, token, onLogout }) {
         <section className="tasks-section">
           <div className="section-heading">
             <h2>Your tasks</h2>
-            <p>Everything you're currently working on.</p>
+            <p>Search, filter and organize your work.</p>
           </div>
+
+          <TaskFilters
+            filters={filters}
+            onChange={handleFilterChange}
+            onReset={handleResetFilters}
+          />
 
           {loading ? (
             <p className="loading-text">Loading tasks...</p>
           ) : (
-            <TaskList
-              tasks={tasks}
-              onTaskClick={handleTaskClick}
-              onEditTask={handleEditTask}
-              onDeleteTask={handleDeleteTask}
-            />
+            <>
+              <TaskList
+                tasks={tasks}
+                onTaskClick={handleTaskClick}
+                onEditTask={handleEditTask}
+                onDeleteTask={handleDeleteTask}
+              />
+
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={loadTasks}
+              />
+            </>
           )}
         </section>
 

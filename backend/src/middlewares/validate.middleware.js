@@ -1,8 +1,8 @@
 //to validate
 
-const validateMiddleware = (schema) => {
+const validateMiddleware = (schema, source = "body") => {
   return (req, res, next) => {
-    const result = schema.safeParse(req.body);
+    const result = schema.safeParse(req[source]);
     if (!result.success) return next(result.error);
     req[source] = result.data;
     next();

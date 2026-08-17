@@ -18,6 +18,8 @@ const request = async (url, options = {}) => {
   };
 };
 
+// AUTH
+
 export const registerUser = async (userData) => {
   return request("/users", {
     method: "POST",
@@ -32,16 +34,30 @@ export const loginUser = async (userData) => {
   });
 };
 
-export const getTasks = async (token) => {
-  return request("/tasks", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
+// TASKS
 
-export const getTaskById = async (taskId, token) => {
-  return request(`/tasks/${taskId}`, {
+export const getTasks = async (
+  token,
+  {
+    search = "",
+    status = "",
+    priority = "",
+    sort = "",
+    page = 1,
+    limit = 10,
+  } = {},
+) => {
+  const params = new URLSearchParams();
+
+  if (search) params.set("search", search);
+  if (status) params.set("status", status);
+  if (priority) params.set("priority", priority);
+  if (sort) params.set("sort", sort);
+
+  params.set("page", page);
+  params.set("limit", limit);
+
+  return request(`/tasks?${params.toString()}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -55,6 +71,14 @@ export const createTask = async (taskData, token) => {
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(taskData),
+  });
+};
+
+export const getTaskById = async (taskId, token) => {
+  return request(`/tasks/${taskId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 };
 
