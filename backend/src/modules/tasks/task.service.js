@@ -6,13 +6,37 @@ const createTask = async (taskData) => {
   return task;
 };
 
-const getTasks = async (userId, status, priority, sort, page, limit) => {
+const getTasks = async (
+  userId,
+  search,
+  status,
+  priority,
+  sort,
+  page,
+  limit,
+) => {
   const query = {
     createdBy: userId,
   };
   //add status property to query if it exists
   if (status) {
     query.status = status;
+  }
+  if (search) {
+    query.$or = [
+      {
+        title: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+      {
+        description: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+    ];
   }
   //add priority property to query if it exists
   if (priority) {

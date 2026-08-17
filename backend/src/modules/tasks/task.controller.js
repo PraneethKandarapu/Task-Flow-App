@@ -23,10 +23,11 @@ const createTask = async (req, res, next) => {
 const getTasks = async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    const { status, priority, sort, page, limit } = req.query;
+    const { search, status, priority, sort, page, limit } = req.query;
 
     const { tasks, totalTasks } = await taskService.getTasks(
       userId,
+      search,
       status,
       priority,
       sort,

@@ -17,6 +17,7 @@ const updateTaskSchema = z.object({
 });
 
 const getTasksQuerySchema = z.object({
+  search: z.string().trim().min(1).optional(),
   status: z.enum(["todo", "in-progress", "done"]).optional(),
   priority: z.enum(["low", "medium", "high"]).optional(),
   sort: z.enum(["dueDate", "-dueDate"]).optional(),
